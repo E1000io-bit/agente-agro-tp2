@@ -110,7 +110,7 @@ def armar_set(n: int) -> None:
             shutil.copy2(p, dst)
             filas.append({"archivo": str(dst.relative_to(RAIZ)), "slug_esperado": slug, "origen": origen, "clase_original": carpeta.name})
     with open(SET_EVAL / "etiquetas.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(filas[0]))
+        w = csv.DictWriter(f, fieldnames=list(filas[0]), lineterminator="\n")
         w.writeheader()
         w.writerows(filas)
     print(f"{len(filas)} imágenes -> {SET_EVAL}")

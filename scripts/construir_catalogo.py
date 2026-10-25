@@ -42,7 +42,7 @@ def main() -> None:
         })
     salida = RAIZ / "data" / "catalogo_plagas.csv"
     with open(salida, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(filas[0]))
+        w = csv.DictWriter(f, fieldnames=list(filas[0]), lineterminator="\n")
         w.writeheader()
         w.writerows(filas)
     print(f"{len(filas)} plagas -> {salida}")
