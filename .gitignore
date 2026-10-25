@@ -1,0 +1,13 @@
+.env
+.cache/
+datasets/
+__pycache__/
+*.pyc
+.venv/
+data/index/embeddings.npy
+data/eval/imagenes/
+*.zip
+.DS_Store
+.vscode/
+.idea/
+data/index/embeddings_modelo.txt

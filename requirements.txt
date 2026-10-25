@@ -1,0 +1,14 @@
+# Núcleo (corpus, RAG BM25, tools, evaluación) — probado con Python 3.11+
+requests>=2.31
+beautifulsoup4>=4.12
+pypdf>=4.0
+python-dotenv>=1.0
+
+# Opcional: embeddings densos para el RAG híbrido (python -m agente.rag.indexar --embeddings)
+# numpy>=1.26
+# sentence-transformers>=3.0
+
+# El LLM / framework del agente depende del repo de la materia, por ejemplo:
+# openai>=1.40        # o compatibles: Groq, Ollama, LM Studio
+# anthropic>=0.40
+# langgraph>=0.2  langchain-core>=0.3
