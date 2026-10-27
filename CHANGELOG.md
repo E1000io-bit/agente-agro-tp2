@@ -4,8 +4,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). F
 
 ## [Sin publicar]
 
+### Agregado
+- **Agente de consultas por texto** siguiendo `17_Agentes` de la cátedra (2026-10-27):
+  - `agente/llm.py`: Hugging Face Router vía cliente OpenAI / `ChatOpenAI` (`Qwen/Qwen2.5-7B-Instruct` por defecto).
+  - `agente/react_manual.py`: ReAct manual (Tool, prompt, parser `FINAL:`/`Final Answer:`, loop con traza y memoria).
+  - `agente/agente_langchain.py`: `create_agent` con `@tool`, skill `evaluar_riesgo` y memoria por `thread_id`.
+  - `agente/consultas.py` (tools de texto compartidas), `agente/guardrails.py` (filtro de dosis antes/después), `agente/chat.py`.
+  - `notebooks/AgroAgente_consultas.ipynb`, `docs/07-agente-consultas.md`, decisiones D-08 y D-09.
+  - `tests/test_agente.py` con LLM simulado (en el CI).
+
+### Corregido
+- El chunk "Identidad" absorbía la sección "Condiciones predisponentes" (regex `condici`). Ahora es un chunk propio: 937 fragmentos; métricas del retriever sin cambios.
+
 ### Pendiente
-- Loop del agente con el framework del repo de la materia.
+- Correr y evaluar el agente con `HF_TOKEN` (las dos versiones) y LLM-juez.
 - Probar `diagnosticar_cultivo`, `identificar_maleza` e `info_eppo` con API keys reales.
 - Evaluación del agente con LLM (y LLM como juez) contra el baseline.
 - Set de imágenes de evaluación (PlantDoc / maíz Mendeley).

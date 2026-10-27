@@ -123,21 +123,19 @@ flowchart LR
 
 ---
 
-## 5. Mapeo con los temas de la materia (completar con el repo)
+## 5. Mapeo con los temas de la materia
 
-Cuando tenga el link del GitHub, marco qué aplica. Plantilla:
+Repo de la cátedra: https://github.com/lauraceciliadiazdavila/IA-LIDeSIA-Dpto-Computacion (FCEFyN – UNC, LIDeSIA). Unidades: intro al entorno, regresión, árboles CART, SVM, K-means, HAC, MLP, CNN, RNN, autoencoders, YOLO, series temporales y **17_Agentes**, que es la base del TP2.
 
-| Tema típico del repo | Pieza del agente que lo usa |
+| Tema del repo | Pieza del agente que lo usa |
 |---|---|
-| Prompting / system prompt | Rol "asistente fitosanitario", reglas de citas y derivación |
-| Function calling / tools | Tools de imagen, clima, glosario, EPPO |
-| RAG (chunking, embeddings, vector DB) | Fichas SINAVIMO + docs INTA, chunk por sección de ficha, filtros por cultivo |
-| Patrón ReAct / agentes con loop | Orquestación diagnóstico → RAG → clima |
-| Grafos (LangGraph u otro) / multi-agente | Variante D |
-| Memoria | Estado del lote: cultivo, ubicación, fenología |
-| Multimodalidad / visión | Diagnóstico por foto |
-| MCP | Exponer las tools como servidor MCP (hay precedente: plantnet-mcp) |
-| Evaluación / guardrails | §6 |
+| `17_Agentes/Agente_ReAct.ipynb`: HF Router + `Tool` + prompt ReAct + parser + loop | `agente/llm.py`, `agente/react_manual.py` |
+| `17_Agentes/Agente_LangChain.ipynb`: `@tool`, `create_agent`, skills como tools | `agente/agente_langchain.py`, skill `evaluar_riesgo` |
+| "RAG Agents" (próximos pasos de la notebook) | `buscar_fichas` sobre SINAVIMO + informes de chicharrita |
+| `13_YOLO` / `10_CNN` (visión) | Etapa 2: diagnóstico por foto (tools ya preparadas) |
+| `18_Forecasting` / series temporales | Idea a futuro: serie de capturas de chicharrita por región |
+
+Detalle en `docs/07-agente-consultas.md`.
 
 ---
 

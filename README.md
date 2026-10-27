@@ -2,7 +2,7 @@
 
 Agente conversacional de consulta fitosanitaria para maíz, soja, trigo y maní de la región centro de Argentina. Responde por texto o foto, cita fuentes oficiales (SENASA/SINAVIMO, Red Nacional de Monitoreo de chicharrita), cruza las condiciones que favorecen cada plaga con el pronóstico del lote y **no receta productos ni dosis**.
 
-> **Pendiente:** armar el loop del agente con el framework del repo de la materia (`docs/03-arquitectura-y-tools.md` §2 muestra cómo enchufar las tools en un loop propio, LangGraph o MCP). Todo lo demás está listo y probado.
+> **Estado (27/10/2026):** agente de **consultas por texto** listo en dos versiones, siguiendo `17_Agentes` de la cátedra: ReAct manual y LangChain `create_agent`, con Hugging Face Router y Qwen2.5-7B. Ver [`docs/07-agente-consultas.md`](docs/07-agente-consultas.md). Las fotos quedan para la etapa 2.
 
 ## Qué hay en esta carpeta
 
@@ -20,21 +20,30 @@ agente-agro-tp2/
 │   ├── 03-arquitectura-y-tools.md ← flujo, tools, cómo integrarlas, decisiones del RAG, guardrails, memoria
 │   ├── 04-evaluacion.md           ← sets de prueba, resultados del retriever, ablation, baseline, protocolo de imágenes
 │   ├── 05-glosario-agronomico.md  ← conceptos mínimos (MIP, umbrales, fenología, nombres que confunden)
-│   └── 06-decisiones.md           ← registro de decisiones de diseño con fecha y evidencia
+│   ├── 06-decisiones.md           ← registro de decisiones de diseño con fecha y evidencia
+│   └── 07-agente-consultas.md     ← el agente de consultas: alineación con la cátedra, tools, uso, problemas
+├── notebooks/AgroAgente_consultas.ipynb ← demo para Colab en el formato de la cátedra
 ├── data/
 │   ├── plagas_objetivo.csv        ← 70 plagas elegidas: cultivo, grupo, prioridad, alias usados en Argentina
 │   ├── catalogo_plagas.csv        ← lo mismo + nombres vulgares y condición según SINAVIMO + URL
 │   ├── corpus/
 │   │   ├── sinavimo/              ← 70 fichas oficiales en Markdown (síntomas, condiciones predisponentes, biología…)
 │   │   └── chicharrita/           ← 10 informes recientes (N° 42–50 y 52, hasta 20/10/2026) en PDF + texto
-│   ├── index/chunks.jsonl         ← índice del RAG (883 fragmentos)
+│   ├── index/chunks.jsonl         ← índice del RAG (937 fragmentos)
 │   └── eval/
 │       ├── preguntas_manual.jsonl ← 30 preguntas difíciles (síntomas sin nombrar la plaga, guardrails)
 │       ├── preguntas_auto.jsonl   ← 262 preguntas generadas desde las fichas
 │       ├── juez_prompt.md         ← prompt de LLM-as-judge (fidelidad + tasa de respuesta)
 │       └── resultados_baseline_extractivo.jsonl
 ├── agente/
-│   ├── prompts/system_prompt.md   ← prompt del agente (flujo + reglas + estilo)
+│   ├── llm.py                     ← conexión HF Router (cliente OpenAI / ChatOpenAI), como la cátedra
+│   ├── react_manual.py            ← AGENTE ReAct manual (Tool, prompt, parser, loop, traza, memoria)
+│   ├── agente_langchain.py        ← AGENTE LangChain (create_agent + @tool + skill + memoria)
+│   ├── consultas.py               ← tools de texto compartidas por los dos agentes
+│   ├── guardrails.py              ← filtro de dosis antes y después del LLM
+│   ├── chat.py                    ← chat por consola
+│   ├── prompts/system_prompt_consultas.md ← prompt del agente de consultas
+│   ├── prompts/system_prompt.md   ← prompt completo (con fotos, etapa 2)
 │   ├── registro_tools.py          ← TODAS las tools + JSON schemas (OpenAI / Anthropic) + ejecutar()
 │   ├── rag/indexar.py · buscar.py ← chunking por sección + BM25 en español (+ densos opcional)
 │   ├── tools/clima.py             ← Open-Meteo: geocodificar, pronóstico, histórico
@@ -51,7 +60,7 @@ agente-agro-tp2/
 │   ├── evaluar_retriever.py       ← hit@k / MRR
 │   ├── evaluar_agente.py          ← corre el set contra tu agente y calcula chequeos
 │   └── crear_issues_iniciales.sh  ← crea etiquetas + issues de próximos pasos (gh CLI, una sola vez)
-└── tests/test_offline.py          ← tests sin red
+└── tests/                         ← test_offline.py (sin red) · test_agente.py (agentes con LLM simulado)
 ```
 
 ## Arranque rápido
@@ -59,9 +68,11 @@ agente-agro-tp2/
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                                    # completar keys (crop.health, Pl@ntNet; EPPO opcional)
+cp .env.example .env                                    # completar HF_TOKEN (las otras keys son para la etapa de fotos)
 
-python tests/test_offline.py                            # 4 tests sin red
+python tests/test_offline.py && python tests/test_agente.py   # tests sin red ni token
+python -m agente.chat                                   # chatear con el agente (LangChain)
+python -m agente.chat --modo react --traza              # versión ReAct manual mostrando los pasos
 python -m agente.probar_tools                           # prueba todas las tools (usa internet)
 python -m agente.rag.buscar "manchas circulares con borde rojizo en soja"
 python scripts/evaluar_retriever.py                     # hit@3 = 0,88 en el set manual
@@ -84,15 +95,16 @@ python -m agente.rag.indexar && python scripts/construir_catalogo.py && python s
 | Tools crop.health / Pl@ntNet / EPPO | 🔑 endpoints verificados, falta probar con API key |
 | System prompt + guardrails | ✅ escrito, falta evaluarlo con el LLM |
 | Evaluación: sets, juez, scripts, baseline sin LLM | ✅ |
-| Loop del agente + UI | ⏳ según framework del repo de la materia |
+| Agente de consultas: ReAct manual + LangChain, memoria, guardrails, chat, notebook | ✅ probado con LLM simulado; falta correrlo con `HF_TOKEN` y evaluarlo |
+| Fotos (etapa 2) + UI | ⏳ |
 
 ## Próximos pasos (plan compacto)
 
-1. Ver el repo de la materia → elegir framework/LLM y armar el loop con `registro_tools.py` (1–2 días).
-2. Registrarse en crop.health y Pl@ntNet, probar `python -m agente.probar_tools --foto hoja.jpg`.
-3. Correr `scripts/evaluar_agente.py` con el agente real + juez → tabla de resultados vs. baseline.
-4. Set de imágenes (`descargar_datasets.py plantdoc` + `armar-set`) → accuracy crop.health vs. VLM.
-5. UI simple (Streamlit/Gradio o la de la cátedra), informe y demo (`docs/04-evaluacion.md` §5).
+1. Cargar `HF_TOKEN`, probar `python -m agente.chat --modo react --traza` y ajustar el prompt según cómo responde Qwen2.5-7B.
+2. Evaluar las dos versiones con `scripts/evaluar_agente.py` + LLM-juez → tabla vs. baseline (76 %).
+3. Reescritura de consulta para mejorar la recuperación con descripciones coloquiales.
+4. Etapa 2, fotos: crop.health / Pl@ntNet + set de imágenes (`descargar_datasets.py`).
+5. UI simple, informe y demo (`docs/04-evaluacion.md` §5).
 
 ## Cómo colaborar
 
