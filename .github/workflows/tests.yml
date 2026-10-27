@@ -16,6 +16,8 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Tests sin red
-        run: python tests/test_offline.py
+        run: |
+          python tests/test_offline.py
+          python tests/test_agente.py
       - name: Métricas del retriever (para comparar entre PRs)
         run: python scripts/evaluar_retriever.py | tail -1 >> "$GITHUB_STEP_SUMMARY"

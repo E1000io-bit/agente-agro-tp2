@@ -11,7 +11,7 @@
 
 ## 2. Resultados del retriever (línea de base, sólo BM25)
 
-`python scripts/evaluar_retriever.py` — 25/10/2026, 70 fichas + 10 informes, 883 chunks:
+`python scripts/evaluar_retriever.py` — 25/10/2026, 70 fichas + 10 informes, 937 chunks (re-medido el 27/10 tras separar "Condiciones predisponentes", mismas métricas):
 
 | Set | n | hit@1 | hit@3 | hit@5 | MRR |
 |---|---|---|---|---|---|

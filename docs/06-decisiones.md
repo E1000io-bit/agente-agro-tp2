@@ -14,6 +14,18 @@ Plantilla:
 
 ---
 
+## D-09 · Primera versión sólo con consultas por texto — 2026-10-27 · Estado: vigente
+**Contexto:** el diagnóstico por foto suma APIs pagas o con cuota, datasets y una evaluación aparte.
+**Decisión:** la primera entrega es el agente de consultas por texto (fichas, chicharrita, clima, riesgo, glosario). Las tools de imagen quedan listas pero desconectadas.
+**Consecuencias:** etapa 2 = fotos (`docs/03-arquitectura-y-tools.md`, issue de imágenes).
+
+## D-08 · Framework y LLM: los mismos de la cátedra, en dos versiones — 2026-10-27 · Estado: vigente
+**Contexto:** el TP se basa en `17_Agentes` del repo de la cátedra.
+**Alternativas:** sólo ReAct manual · sólo LangChain · LangGraph a mano · otro proveedor de LLM.
+**Decisión:** Hugging Face Router con cliente OpenAI y `Qwen/Qwen2.5-7B-Instruct` (configurable por `.env`), con dos implementaciones que comparten tools: **ReAct manual** (`react_manual.py`) y **LangChain `create_agent`** (`agente_langchain.py`), con `evaluar_riesgo` como skill.
+**Motivo:** replica el recorrido de la materia (manual → framework), permite comparar las dos en el informe, y la versión manual no depende de que el proveedor soporte *function calling*.
+**Consecuencias:** cada cambio de tools va en `agente/consultas.py` para que impacte en las dos versiones.
+
 ## D-07 · BM25 como retriever por defecto (sin embeddings densos) — 2026-10-25 · Estado: vigente
 **Contexto:** había que elegir entre recuperación léxica, densa o híbrida.
 **Alternativas:** BM25 · denso `multilingual-e5-small` · denso `multilingual-e5-base` · híbridos RRF.
@@ -21,7 +33,7 @@ Plantilla:
 **Motivo / evidencia:** en el set manual BM25 logró hit@1 0,73 / MRR 0,82; los híbridos 0,69 / 0,77–0,80 y los densos solos 0,38–0,46 de hit@1 (`docs/04-evaluacion.md`).
 **Consecuencias:** el código soporta densos (`--embeddings`) para volver a probar con otros modelos o con *query rewriting*.
 
-## D-06 · Chunking por sección de ficha + chunk "Identidad" — 2026-10-25 · Estado: vigente
+## D-06 · Chunking por sección de ficha + chunk "Identidad" — 2026-10-25 · Estado: vigente (corregido el 2026-10-27: "Condiciones predisponentes" quedaba dentro de "Identidad" por una regex demasiado amplia; ahora es un chunk propio)
 **Contexto:** las fichas de SINAVIMO tienen secciones que responden preguntas distintas; las secciones cortas sueltas metían ruido.
 **Alternativas:** ventanas de tamaño fijo · una ficha = un chunk · una sección = un chunk.
 **Decisión:** una sección = un chunk, con encabezado `nombre científico (nombres vulgares + alias) [tipo · grupo]`; secciones cortas agrupadas en "Identidad"; bibliografía fuera del índice.
