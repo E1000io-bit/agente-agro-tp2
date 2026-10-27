@@ -25,7 +25,7 @@ CORPUS = RAIZ / "data" / "corpus"
 INDICE = RAIZ / "data" / "index"
 NO_INDEXAR = re.compile(r"^bibliograf", re.I)
 # Secciones cortas que se agrupan en un único chunk "Identidad" (si van solas meten ruido)
-A_IDENTIDAD = re.compile(r"^(tipo de plaga|taxonom|condici|sinonimia|otros nombres|acr[oó]nimo|nombre)", re.I)
+A_IDENTIDAD = re.compile(r"^(tipo de plaga|taxonom|condici[oó]n$|sinonimia|otros nombres|acr[oó]nimo|nombre)", re.I)
 CSV_OBJETIVO = RAIZ / "data" / "plagas_objetivo.csv"
 
 
