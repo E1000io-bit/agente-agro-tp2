@@ -8,7 +8,8 @@ python-dotenv>=1.0
 # numpy>=1.26
 # sentence-transformers>=3.0
 
-# El LLM / framework del agente depende del repo de la materia, por ejemplo:
-# openai>=1.40        # o compatibles: Groq, Ollama, LM Studio
-# anthropic>=0.40
-# langgraph>=0.2  langchain-core>=0.3
+# Agente (como en 17_Agentes de la cátedra): Hugging Face Router vía cliente OpenAI + LangChain
+openai>=1.40
+langchain>=1.0
+langchain-openai>=0.3
+langgraph>=0.4
